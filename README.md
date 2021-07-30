@@ -58,4 +58,37 @@ to connect to the VM:
   ssh arlotito@standard-ds2-v2-edge-1-2-1627639870.westeurope.cloudapp.azure.com -i ./keys/vm
 ```
 
-All operations on the remote machine are done via 
+NOTE:
+All operations on the remote machine are done via SSH.
+A key pair is automatically created.
+
+# Usage
+```bash
+./vm-iotedge-provision.sh -h
+
+Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-edge-version> -h <iot-hub-name> [-d <deployment-manifest>] [-l] [-k <ssh-keys-folder>]
+
+  -h                            display this help
+  -s  <vm-size>                 vm size ('Standard_DS2_v2', 'Standard_D2_v2', 'Standard_DS2_v2'...)
+  -g  <resource-group>          resource-group
+  -e  <iot-edge-version>        '1.1', '1.2' or '1.2.2'
+  -n  <iot-hub-name>            IoT HUB name (will be used to provision the IoT Edge)
+  -d  <deployment-manifest>     (optional) deployment manifest. 
+                                Default is none.
+  -u  <username>                (optional) VM username.
+                                Default is 'arlotito'
+  -k  <ssh-keys-folder>         (optional) folder with ssh key pair ('vm', 'vm.pub'). If empty, a key pair will be generareted.
+                                Default is './keys' 
+  -l                            (optional) SSH into the VM once done.
+                                Default is do not login.
+
+Prerequisites:
+    - ssh client
+    - az cli with iot extension (https://github.com/Azure/azure-iot-cli-extension)
+    - az cli signed-in onto the tenant/subscription where you want to operate. If not already signed-in, do:
+        az login
+
+Example:
+
+    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -d ./manifests/empty-1.2.json -e 1.2 -n my-iot-hub
+```
