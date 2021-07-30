@@ -82,13 +82,13 @@ Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-
   -l                            (optional) SSH into the VM once done.
                                 Default is do not login.
 
+Example:
+    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -d ./manifests/empty-1.2.json -e 1.2 -n my-iot-hub
+
 Prerequisites:
     - ssh client
     - az cli with iot extension (https://github.com/Azure/azure-iot-cli-extension)
-    - az cli signed-in onto the tenant/subscription where you want to operate. If not already signed-in, do:
-        az login
 
-Example:
-
-    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -d ./manifests/empty-1.2.json -e 1.2 -n my-iot-hub
+Note:
+If not already signed-in, do 'az login' and select the tenant/subscription where you want to operate.
 ```
