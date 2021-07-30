@@ -1,4 +1,4 @@
-A bash script to spin up a VM with a fully provisioned Azure IoT Edge ready to be used.
+A bash script to spin up a VM with Ubuntu Server 18.04 and a fully provisioned Azure IoT Edge ready-to-go.
 
 It's easy as:
 ```bash
