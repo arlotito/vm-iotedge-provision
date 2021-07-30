@@ -10,7 +10,7 @@ It's easy as:
 ```
 
 It will:
-* create a VM of the given size ('Standard_DS2_v2') in the given resource group ('my-rg')
+* create a VM of the given size ('Standard_DS2_v2') in the given resource group ('my-rg') with Ubuntu Server 18.04
 * install IoT Edge (version 1.2)
 * register an edge device identity with the IoT HUB ('my-iot-hub') and configure the IoT Edge to use it
 * deploy the manifest ('./manifests/empty-1.2.json')
