@@ -1,4 +1,4 @@
-A bash script to spin-up a VM with a fully provisioned Azure IoT Edge ready to be used.
+A bash script to spin up a VM with a fully provisioned Azure IoT Edge ready to be used.
 
 It's easy as:
 ```bash
@@ -98,9 +98,9 @@ The 'vm-iotedge-provision.sh' is the main script and it calls two sub-scripts:
 * edge-install.sh, for installing iotedge
 * edge-config.sh, for configuring iotedge 
 
-You can use those sub-scripts as standalone scripts.
+You can use those sub-scripts as standalone scripts if you like.
 
-You can invoke them locally:
+Locally:
 
 ```bash
 ./edge-install -e <edge-version>
@@ -113,7 +113,7 @@ ssh <username>@<ip-or-fqdn> -i <ssh-key> -t "bash -s" -- < ./edge-install.sh -e 
 ssh <username>@<ip-or-fqdn> -i <ssh-key> -t "bash -s" -- < ./edge-config.sh -e "<edge-version>" -c "<conn-string>"
 ```
 
-Additional details in the help.
+Additional details in the script help (-h).
 
 
 
