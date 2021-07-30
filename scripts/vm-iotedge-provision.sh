@@ -38,6 +38,7 @@ deploymentManifest=""
 HUB_NAME=""
 SSH_KEY_FOLDER="./keys"
 HOST_USERNAME="arlotito"
+VM_SHUTDOWN_TIME=2100
 while getopts "hls:d:g:e:k:n:u:" args; do
     case "${args}" in
         h ) showHelp;;
@@ -105,15 +106,15 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-echo creating resource group...
-result=$(az group create --location westeurope --resource-group edge-benchmark-vm-rg | jq -r .properties.provisioningState)
+echo "creating resource group '$VM_RG'..."
+result=$(az group create --location westeurope --resource-group $VM_RG | jq -r .properties.provisioningState)
 if [ "$result" != "Succeeded" ]; then
     echo -e "${RED}ERROR!${NC}"
     exit 1
 fi
 
 # create VM
-echo creating vm...
+echo "creating vm '$VM_NAME'..."
 result=$(az vm create --name $VM_NAME -g $VM_RG \
     --public-ip-address-dns-name $VM_NAME --public-ip-sku Standard \
     --image Canonical:UbuntuServer:18.04-LTS:latest \
@@ -129,10 +130,10 @@ fi
 
 export HOST_IP=$result
 
-echo "setting vm autoshutdown..."
+echo "setting vm autoshutdown at '$VM_SHUTDOWN_TIME'..."
 result=$(az vm auto-shutdown \
     --name $VM_NAME -g $VM_RG \
-    --time 2100 | jq -r .id
+    --time $VM_SHUTDOWN_TIME | jq -r .id
 )
 if [ "$result" == "" ]; then
     echo -e "${RED}ERROR!${NC}"
@@ -140,7 +141,7 @@ if [ "$result" == "" ]; then
 fi
 
 # register iot edge identity
-echo "register device identity with IoT HUB..."
+echo "register the edge device identity '$DEVICE_NAME' with the IoT HUB '$HUB_NAME'..."
 result=$(az iot hub device-identity create \
     -n $HUB_NAME \
     -d $DEVICE_NAME \
@@ -151,7 +152,7 @@ if [ "$result" != "enabled" ]; then
     exit 1
 fi
 
-echo "getting the connection string..."
+echo "getting the edge device connection string..."
 result=$(az iot hub device-identity connection-string show \
     -n $HUB_NAME \
     -d $DEVICE_NAME | jq -r .connectionString)
@@ -163,11 +164,11 @@ fi
 export CONN_STRING=$result
 
 # wait a bit 
-echo "wait 10s..."
+echo "wait a while for the VM to boot (10s)..."
 sleep 10
 
 # add the host's key to the known-host (to avoid the prompt later on)
-echo "adding HOST's pub key to known hosts..."
+echo "adding host pub key to ~/.ssh/known_hosts..."
 ssh-keyscan -t ssh-rsa $HOST_IP >> ~/.ssh/known_hosts
 
 # add a TAG
@@ -177,30 +178,30 @@ ssh-keyscan -t ssh-rsa $HOST_IP >> ~/.ssh/known_hosts
 #    --tags "{\"benchmark\": \"${DEVICE_TAG}\"}"
 
 # provision iot edge
-echo "installing iot edge..."
-result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- < edge-install.sh -e "${edgeVersion}" 1>null 2>null )
+echo "installing iot edge ${edgeVersion}..."
+result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- < edge-install.sh -e "${edgeVersion}" 1>log 2>log )
 
-echo "configuring iot edge..."
-result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- <  ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q} 1>null 2>null )
+echo "configuring iot edge with the provisioned edge device identity..."
+result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- <  ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q} 1>log 2>log )
 
 if [ "$deploymentManifest" != "" ]; then
     # deploy
-    echo "deploying manifest $deploymentManifest..."
-    az iot edge set-modules \
+    echo "deploying manifest '$deploymentManifest'..."
+    result=$(az iot edge set-modules \
         -n $HUB_NAME \
         -d $DEVICE_NAME \
-        --content $deploymentManifest
+        --content $deploymentManifest)
 fi
 
 # wait a bit 
-echo "wait 10s..."
+echo "wait a while for the edge modules to start (10s)..."
 sleep 10
 
 echo "done!"
 echo
 echo
 
-echo "checking whether IoT Edge is up and running on the VM:"
+echo "remotely connecting to VM to check whether IoT Edge is up and running:"
 ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge version"
 ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge list"
 
