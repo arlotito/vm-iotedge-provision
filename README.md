@@ -92,3 +92,30 @@ Prerequisites:
 Note:
 If not already signed-in, do 'az login' and select the tenant/subscription where you want to operate.
 ```
+
+# other scripts (iot edge install and configure)
+The 'vm-iotedge-provision.sh' is the main script and it calls two sub-scripts:
+* edge-install.sh, for installing iotedge
+* edge-config.sh, for configuring iotedge 
+
+You can use those sub-scripts as standalone scripts.
+
+You can invoke them locally:
+
+```bash
+./edge-install -e <edge-version>
+./edge-config -c <connection-string> -e  <edge-version>
+```
+
+...or on a remote machine via SSH (using keys or interactive psw):
+```bash
+ssh <username>@<ip-or-fqdn> -i <ssh-key> -t "bash -s" -- < ./edge-install.sh -e "<edge-version>"
+ssh <username>@<ip-or-fqdn> -i <ssh-key> -t "bash -s" -- < ./edge-config.sh -e "<edge-version>" -c "<conn-string>"
+```
+
+Additional details in the help.
+
+
+
+
+
