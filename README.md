@@ -3,21 +3,21 @@ A bash script to spin up a VM with a fully provisioned Azure IoT Edge ready to b
 It's easy as:
 ```bash
 ./vm-iotedge-provision.sh \
-    -s Standard_DS2_v2 -g vm-iotedge-rg \
+    -s Standard_DS2_v2 -g my-rg \
     -e 1.2 \
     -n my-iot-hub \
     -d ./manifests/empty-1.2.json 
 ```
 
 It will:
-* create a VM of the given size ('Standard_DS2_v2') in the given resource group ('vm-iotedge-rg')
+* create a VM of the given size ('Standard_DS2_v2') in the given resource group ('my-rg')
 * install IoT Edge (version 1.2)
 * register an edge device identity with the IoT HUB ('my-iot-hub') and configure the IoT Edge to use it
 * deploy the manifest ('./manifests/empty-1.2.json')
 
 Here's the output:
 ```
-creating resource group 'vm-iotedge-rg'...
+creating resource group 'my-rg'...
 creating vm 'standard-ds2-v2-edge-1-2-1627639870'...
 setting vm autoshutdown at '2100'...
 register the edge device identity 'standard-ds2-v2-edge-1-2-1627639870' with the IoT HUB 'my-iot-hub'...
@@ -44,7 +44,7 @@ SUMMARY
 ----------------------------------------
 VM
   - name:         standard-ds2-v2-edge-1-2-1627639870
-  - rg:           vm-iotedge-rg
+  - rg:           my-rg
   - fqdn:         standard-ds2-v2-edge-1-2-1627639870.westeurope.cloudapp.azure.com
   - username:     arlotito
   - ssh keys:     ./keys/vm.pub, ./keys/vm
