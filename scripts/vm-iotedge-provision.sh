@@ -178,11 +178,11 @@ ssh-keyscan -t ssh-rsa $HOST_IP >> ~/.ssh/known_hosts
 #    --tags "{\"benchmark\": \"${DEVICE_TAG}\"}"
 
 # provision iot edge
-echo "installing iot edge ${edgeVersion}..."
-result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- < edge-install.sh -e "${edgeVersion}" 1>log 2>log )
+echo "installing iot edge ${edgeVersion} (output written to ./vm.log)..."
+result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- < edge-install.sh -e "${edgeVersion}" 1>vm.log 2>vm.log )
 
-echo "configuring iot edge with the provisioned edge device identity..."
-result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- <  ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q} 1>log 2>log )
+echo "configuring iot edge with the provisioned edge device identity (output written to ./vm.log)..."
+result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- <  ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q} 1>>vm.log 2>>vm.log )
 
 if [ "$deploymentManifest" != "" ]; then
     # deploy
