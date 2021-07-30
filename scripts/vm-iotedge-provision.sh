@@ -23,6 +23,7 @@ Example:
 
 Prerequisites:
     - ssh client
+    - jq (install with: sudo apt-get install jq -y)
     - az cli with iot extension (https://github.com/Azure/azure-iot-cli-extension)
 
 Note:

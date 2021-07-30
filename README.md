@@ -62,6 +62,14 @@ NOTE:
 All operations on the remote machine are done via SSH.
 A key pair is automatically created.
 
+# Prerequisites
+Prerequisites:
+* ssh client
+* jq (install with: `sudo apt-get install jq -y`)
+* az cli with [iot extension](https://github.com/Azure/azure-iot-cli-extension)
+
+If not already signed-in, do `az login` and select the tenant/subscription where you want to operate.
+
 # Usage
 ```bash
 ./vm-iotedge-provision.sh -h
@@ -87,6 +95,7 @@ Example:
 
 Prerequisites:
     - ssh client
+    - jq (install with: sudo apt-get install jq -y)
     - az cli with iot extension (https://github.com/Azure/azure-iot-cli-extension)
 
 Note:
