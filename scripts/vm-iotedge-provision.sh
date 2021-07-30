@@ -26,7 +26,7 @@ Prerequisites:
 
 Example:
 
-    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -d ../config/empty-1.2.json -e 1.2 -n my-iot-hub
+    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -d ../manifests/empty-1.2.json -e 1.2 -n my-iot-hub
 
 EOF
 # EOF is found above and hence cat command stops reading. This is equivalent to echo but much neater when printing out.
