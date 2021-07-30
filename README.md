@@ -93,7 +93,7 @@ Note:
 If not already signed-in, do 'az login' and select the tenant/subscription where you want to operate.
 ```
 
-# other scripts (iot edge install and configure)
+## other scripts (iot edge install and configure)
 The 'vm-iotedge-provision.sh' is the main script and it calls two sub-scripts:
 * edge-install.sh, for installing iotedge
 * edge-config.sh, for configuring iotedge 
