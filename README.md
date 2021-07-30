@@ -12,7 +12,7 @@ It's easy as:
 It will:
 * create a VM of the given size ('Standard_DS2_v2') in the given resource group ('vm-iotedge-rg')
 * install IoT Edge (version 1.2)
-* register an identity into the IoT HUB ('my-iot-hub') and configure the IoT Edge to connect to it
+* register an edge device identity with the IoT HUB ('my-iot-hub') and configure the IoT Edge to use it
 * deploy the manifest ('./manifests/empty-1.2.json')
 
 Here's the output:
