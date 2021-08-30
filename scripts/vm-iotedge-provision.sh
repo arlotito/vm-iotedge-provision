@@ -2,17 +2,18 @@
 showHelp() {
 # `cat << EOF` This means that cat should stop reading when EOF is detected
 cat << EOF  
-Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-edge-version> -h <iot-hub-name> [-d <deployment-manifest>] [-l] [-k <ssh-keys-folder>]
+Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-edge-version> [-h <iot-hub-name>] [-d <deployment-manifest>] [-l] [-k <ssh-keys-folder>]
 
-  -h                            display this help
+  -h                            (optional) display this help
   -s  <vm-size>                 vm size ('Standard_DS2_v2', 'Standard_D2_v2', 'Standard_DS2_v2'...)
   -g  <resource-group>          resource-group
-  -e  <iot-edge-version>        '1.1', '1.2' or '1.2.2'
-  -n  <iot-hub-name>            IoT HUB name (will be used to provision the IoT Edge)
+  -e  <iot-edge-version>        (optional) '1.1', '1.2' or '1.2.2'. If not specified, iot edge won't be installed
+  -n  <iot-hub-name>            (optional) IoT HUB name (will be used to provision the IoT Edge)
+                                If not specified, iot edge won't be provisioned. 
   -d  <deployment-manifest>     (optional) deployment manifest. 
                                 Default is none.
   -u  <username>                (optional) VM username.
-                                Default is 'arlotito'
+                                Default is 'azuser'
   -k  <ssh-keys-folder>         (optional) folder with ssh key pair ('vm', 'vm.pub'). If empty, a key pair will be generareted.
                                 Default is './keys' 
   -l                            (optional) SSH into the VM once done.
@@ -33,12 +34,16 @@ EOF
 # EOF is found above and hence cat command stops reading. This is equivalent to echo but much neater when printing out.
 }
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
 # https://stackoverflow.com/questions/16483119/an-example-of-how-to-use-getopts-in-bash
 login="false";
 deploymentManifest=""
 HUB_NAME=""
 SSH_KEY_FOLDER="./keys"
-HOST_USERNAME="arlotito"
+HOST_USERNAME="azuser"
 VM_SHUTDOWN_TIME=2100
 while getopts "hls:d:g:e:k:n:u:" args; do
     case "${args}" in
@@ -58,12 +63,21 @@ while getopts "hls:d:g:e:k:n:u:" args; do
 done
 shift $((OPTIND-1))
 
-if [ ! "$vmSize" ] || [ ! "$rg" ] || [ ! "$edgeVersion" ] || [ ! "$HUB_NAME" ];
+if [ ! "$vmSize" ] || [ ! "$rg" ];
 then
-    echo "ERROR: required parameter is missing"
-    echo
-    showHelp
+    echo -e "${RED}ERROR: required parameter is missing${NC}"
+    echo "Please see help: ./vm-iotedge-provision.sh -h"
     exit 1
+fi
+
+if [ "$edgeVersion" ];
+then
+    if [ "$edgeVersion" != "1.1" ] && [ "$edgeVersion" != "1.2" ] && [ "$edgeVersion" != "1.2.2" ];
+    then
+        echo -e "${RED}ERROR: tag '$edgeVersion' is not supported${NC}"
+        echo "Please see help: ./vm-iotedge-provision.sh -h"
+        exit 1
+    fi
 fi
 
 export TODAY=$(date +"%s")
@@ -85,13 +99,39 @@ export DEVICE_NAME=$VM_NAME
 
 export DEVICE_TAG=TEST
 
+# print info
+summary_vm () {
+    echo
+    echo
+    echo "SUMMARY"
+    echo "----------------------------------------"
+    echo "VM"
+    echo "  - name:         $VM_NAME"
+    echo "  - rg:           $VM_RG"
+    echo "  - fqdn:         $HOST_IP"
+    echo "  - username:     $HOST_USERNAME"
+    echo "  - ssh keys:     $SSH_KEY_PUB, $SSH_KEY_PRIVATE"
+    echo
+    echo "to connect to the VM:"
+    echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE"
+}
+
+summary_hub () {
+    echo ""
+    echo "IoT HUB"
+    echo "  - name:         $HUB_NAME"
+    echo "  - device ID:    $DEVICE_NAME"
+    echo "  - conn string:  $CONN_STRING"
+}
+
 ##
 # az login
 # az account list -o tsv
 # az account set --subscription internal_sub_arturo
 
 # create ssh keys if not already there
-if [ ! -f "$SSH_KEY_PUB" ] || [ ! -f "$SSH_KEY_PRIVATE" ]; then
+if [ ! -f "$SSH_KEY_PUB" ] || [ ! -f "$SSH_KEY_PRIVATE" ]; 
+then
     echo "creating SSH keypair..."
     mkdir -p $SSH_KEY_FOLDER
     ssh-keygen -b 2048 -t rsa -f $SSH_KEY_PRIVATE -q -N ""
@@ -103,13 +143,12 @@ fi
 # az group create --location westeurope -g $HUB_RG
 # az iot hub create -n ${HUB_NAME} -g ${HUB_RG} --sku S1 --unit 10
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+
 
 echo "creating resource group '$VM_RG'..."
 result=$(az group create --location westeurope --resource-group $VM_RG | jq -r .properties.provisioningState)
-if [ "$result" != "Succeeded" ]; then
+if [ "$result" != "Succeeded" ]; 
+then
     echo -e "${RED}ERROR!${NC}"
     exit 1
 fi
@@ -124,7 +163,8 @@ result=$(az vm create --name $VM_NAME -g $VM_RG \
     --ssh-key-values $SSH_KEY_PUB \
     | jq -r .fqdns
 )
-if [ "$result" == "" ]; then
+if [ "$result" == "" ]; 
+then
     echo -e "${RED}ERROR!${NC}"
     exit 1
 fi
@@ -136,33 +176,45 @@ result=$(az vm auto-shutdown \
     --name $VM_NAME -g $VM_RG \
     --time $VM_SHUTDOWN_TIME | jq -r .id
 )
-if [ "$result" == "" ]; then
+if [ "$result" == "" ]; 
+then
     echo -e "${RED}ERROR!${NC}"
     exit 1
 fi
 
-# register iot edge identity
-echo "register the edge device identity '$DEVICE_NAME' with the IoT HUB '$HUB_NAME'..."
-result=$(az iot hub device-identity create \
-    -n $HUB_NAME \
-    -d $DEVICE_NAME \
-    --ee | jq -r .status
-)
-if [ "$result" != "enabled" ]; then
-    echo -e "${RED}ERROR!${NC}"
-    exit 1
+if [ ! "$edgeVersion" ];
+then
+    summary_vm
+    exit 0
 fi
 
-echo "getting the edge device connection string..."
-result=$(az iot hub device-identity connection-string show \
-    -n $HUB_NAME \
-    -d $DEVICE_NAME | jq -r .connectionString)
-if [ "$result" == "" ]; then
-    echo -e "${RED}ERROR!${NC}"
-    exit 1
-fi
+if [ "$HUB_NAME" ];
+then
+    # register iot edge identity
+    echo "register the edge device identity '$DEVICE_NAME' with the IoT HUB '$HUB_NAME'..."
+    result=$(az iot hub device-identity create \
+        -n $HUB_NAME \
+        -d $DEVICE_NAME \
+        --ee | jq -r .status
+    )
+    if [ "$result" != "enabled" ]; 
+    then
+        echo -e "${RED}ERROR!${NC}"
+        exit 1
+    fi
 
-export CONN_STRING=$result
+    echo "getting the edge device connection string..."
+    result=$(az iot hub device-identity connection-string show \
+        -n $HUB_NAME \
+        -d $DEVICE_NAME | jq -r .connectionString)
+    if [ "$result" == "" ]; 
+    then
+        echo -e "${RED}ERROR!${NC}"
+        exit 1
+    fi
+
+    export CONN_STRING=$result
+fi
 
 # wait a bit 
 echo "wait a while for the VM to boot (10s)..."
@@ -182,21 +234,25 @@ ssh-keyscan -t ssh-rsa $HOST_IP >> ~/.ssh/known_hosts
 echo "installing iot edge ${edgeVersion} (output written to ./vm.log)..."
 result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- < edge-install.sh -e "${edgeVersion}" 1>vm.log 2>vm.log )
 
-echo "configuring iot edge with the provisioned edge device identity (output written to ./vm.log)..."
-result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- <  ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q} 1>>vm.log 2>>vm.log )
+if [ "$HUB_NAME" ];
+then
+    echo "configuring iot edge with the provisioned edge device identity (output written to ./vm.log)..."
+    result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- <  ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q} 1>>vm.log 2>>vm.log )
 
-if [ "$deploymentManifest" != "" ]; then
-    # deploy
-    echo "deploying manifest '$deploymentManifest'..."
-    result=$(az iot edge set-modules \
-        -n $HUB_NAME \
-        -d $DEVICE_NAME \
-        --content $deploymentManifest)
-fi
+    if [ "$deploymentManifest" != "" ]; 
+    then
+        # deploy
+        echo "deploying manifest '$deploymentManifest'..."
+        result=$(az iot edge set-modules \
+            -n $HUB_NAME \
+            -d $DEVICE_NAME \
+            --content $deploymentManifest)
+    fi
 
-# wait a bit 
-echo "wait a while for the edge modules to start (10s)..."
-sleep 10
+    # wait a bit 
+    echo "wait a while for the edge modules to start (10s)..."
+    sleep 10
+if
 
 echo "done!"
 echo
@@ -206,29 +262,13 @@ echo "remotely connecting to VM to check whether IoT Edge is up and running:"
 ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge version"
 ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge list"
 
-# print info
-echo
-echo
-echo "SUMMARY"
-echo "----------------------------------------"
-echo "VM"
-echo "  - name:         $VM_NAME"
-echo "  - rg:           $VM_RG"
-echo "  - fqdn:         $HOST_IP"
-echo "  - username:     $HOST_USERNAME"
-echo "  - ssh keys:     $SSH_KEY_PUB, $SSH_KEY_PRIVATE"
-echo ""
-echo "IoT HUB"
-echo "  - name:         $HUB_NAME"
-echo "  - device ID:    $DEVICE_NAME"
-echo "  - conn string:  $CONN_STRING"
-echo
-echo "to connect to the VM:"
-echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE"
-
-if [ "$login" = "true" ]; then
+if [ "$login" = "true" ]; 
+then
     echo "login into machine..."
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE
 fi
+
+summary_vm
+summary_hub
 
 exit 0
