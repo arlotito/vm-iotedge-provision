@@ -19,8 +19,17 @@ Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-
   -l                            (optional) SSH into the VM once done.
                                 Default is do not login.
 
-Example:
-    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -d ./manifests/empty-1.2.json -e 1.2 -n my-iot-hub
+Example, deploy VM only:
+    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg 
+
+Example, deploy VM and install iot edge (but do not provision it):
+    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -e 1.2
+
+Example, deploy VM and install iot edge, provision an identity on iot hub and configure iot edge accordingly:
+    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -e 1.2 -n my-iot-hub
+
+Example, deploy VM and install iot edge, provision an identity on iot hub, configure iot edge accordingly and deploy a manifest:
+    ./vm-iotedge-provision.sh -s Standard_DS2_v2 -g edge-benchmark-vm-rg -e 1.2 -n my-iot-hub -d ./manifests/empty-1.2.json
 
 Prerequisites:
     - ssh client
@@ -252,7 +261,7 @@ then
     # wait a bit 
     echo "wait a while for the edge modules to start (10s)..."
     sleep 10
-if
+fi
 
 echo "done!"
 echo
