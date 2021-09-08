@@ -219,17 +219,17 @@ iothub_register () {
 
 iotedge_install () {
     echo "installing iot edge ${edgeVersion} (output written to ./vm.log)..."
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_INSTALL_SCRIPT_URL}
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-install.sh
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE ./edge-install.sh -e "${edgeVersion}"
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_INSTALL_SCRIPT_URL} 1>>vm.log 2>>vm.log
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-install.sh 1>>vm.log 2>>vm.log 
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE ./edge-install.sh -e "${edgeVersion}" 1>>vm.log 2>>vm.log
 
 }
 
 iotedge_configure () {
     echo "configuring iot edge with the provisioned edge device identity (output written to ./vm.log)..."
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_CONFIG_SCRIPT_URL}
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-config.sh
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q}
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_CONFIG_SCRIPT_URL} 1>>vm.log 2>>vm.log
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-config.sh 1>>vm.log 2>>vm.log
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q} 1>>vm.log 2>>vm.log
 
     if [ "$deploymentManifest" != "" ]; 
     then
@@ -261,6 +261,7 @@ then
     sleep 10
 
     # add the host's key to the known-host (to avoid the prompt later on)
+    echo 
     echo "adding host pub key to ~/.ssh/known_hosts..."
     ssh-keyscan -t ssh-rsa $HOST_IP >> ~/.ssh/known_hosts
 
@@ -272,11 +273,13 @@ then
         iotedge_configure   
     fi
 
-    # wait a bit 
+    # wait a bit
+    echo 
     echo "wait a while for the edge modules to start (10s)..."
     sleep 10
 
     # checks
+    echo 
     echo "remotely connecting to VM to check whether IoT Edge is up and running:"
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge version"
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge list"
