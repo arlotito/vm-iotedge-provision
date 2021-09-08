@@ -246,6 +246,11 @@ iotedge_configure () {
 # ---------------------------------------------------------------------------
 
 create_keys
+echo $SSH_KEY_PRIVATE
+echo $SSH_KEY_PUB
+exit 0
+
+
 create_rg
 create_vm
 
