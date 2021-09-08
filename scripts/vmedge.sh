@@ -101,8 +101,7 @@ export VM_NAME=${VM_NAME,,}
 
 export VM_RG=${rg}
 
-export SSH_KEY_PUB="$SSH_KEY_FOLDER/vmedge.pub"
-export SSH_KEY_PRIVATE="$SSH_KEY_FOLDER/vmedge.key"
+export SSH_KEY_NAME="vmedge"
 
 export DEVICE_NAME=$VM_NAME
 
@@ -121,10 +120,10 @@ summary_vm () {
     echo "  - rg:           $VM_RG"
     echo "  - fqdn:         $HOST_IP"
     echo "  - username:     $HOST_USERNAME"
-    echo "  - ssh keys:     $SSH_KEY_PUB, $SSH_KEY_PRIVATE"
+    echo "  - ssh keys:     $SSH_KEY_FOLDER/$SSH_KEY_NAME.key, $SSH_KEY_FOLDER/$SSH_KEY_NAME.pub"
     echo
     echo "to connect to the VM:"
-    echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE"
+    echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_FOLDER/$SSH_KEY_NAME.key"
 }
 
 summary_hub () {
@@ -137,13 +136,13 @@ summary_hub () {
 
 create_keys () {
     # create ssh keys if not already there
-    if [ ! -f "$SSH_KEY_PUB" ] || [ ! -f "$SSH_KEY_PRIVATE" ]; 
+    if [ ! -f "$SSH_KEY_FOLDER/$SSH_KEY_NAME.pub" ] || [ ! -f "$SSH_KEY_FOLDER/$SSH_KEY_NAME.key" ]; 
     then
         echo "creating SSH keypair..."
         mkdir -p $SSH_KEY_FOLDER
-        ssh-keygen -b 2048 -t rsa -f $SSH_KEY_PRIVATE -q -N ""
-        chmod 400 $SSH_KEY_PRIVATE
-        chmod 444 $SSH_KEY_PUB
+        ssh-keygen -b 2048 -t rsa -f $SSH_KEY_FOLDER/$SSH_KEY_NAME -q -N ""
+        chmod 400 $SSH_KEY_FOLDER/$SSH_KEY_NAME.key
+        chmod 444 $SSH_KEY_FOLDER/$SSH_KEY_NAME.pub
     fi
 }
 
@@ -221,6 +220,7 @@ iotedge_install () {
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_INSTALL_SCRIPT_URL}
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-install.sh
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x ./edge-install.sh -e "${edgeVersion}"
+
 }
 
 iotedge_configure () {
