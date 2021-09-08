@@ -221,7 +221,7 @@ iotedge_install () {
     echo "installing iot edge ${edgeVersion} (output written to ./vm.log)..."
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_INSTALL_SCRIPT_URL}
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-install.sh
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x ./edge-install.sh -e "${edgeVersion}"
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE ./edge-install.sh -e "${edgeVersion}"
 
 }
 
@@ -229,7 +229,7 @@ iotedge_configure () {
     echo "configuring iot edge with the provisioned edge device identity (output written to ./vm.log)..."
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_CONFIG_SCRIPT_URL}
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-config.sh
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q}
+    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q}
 
     if [ "$deploymentManifest" != "" ]; 
     then
@@ -246,11 +246,6 @@ iotedge_configure () {
 # ---------------------------------------------------------------------------
 
 create_keys
-echo $SSH_KEY_PRIVATE
-echo $SSH_KEY_PUB
-exit 0
-
-
 create_rg
 create_vm
 
