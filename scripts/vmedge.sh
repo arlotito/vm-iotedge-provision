@@ -126,7 +126,7 @@ summary_vm () {
     echo "  - ssh keys:     $SSH_KEY_PRIVATE, $SSH_KEY_PUB"
     echo
     echo "to connect to the VM:"
-    echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PUB"
+    echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE"
 }
 
 summary_hub () {
