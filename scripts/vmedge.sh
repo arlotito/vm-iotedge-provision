@@ -219,8 +219,6 @@ iothub_register () {
 
 iotedge_install () {
     echo "installing iot edge ${edgeVersion} (output written to ./vm.log)..."
-    result=$(ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "bash -s" -- < edge-install.sh -e "${edgeVersion}" 1>vm.log 2>vm.log )
-
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_INSTALL_SCRIPT_URL}
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-install.sh
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x ./edge-install.sh -e "${edgeVersion}"
@@ -229,7 +227,6 @@ iotedge_install () {
 
 iotedge_configure () {
     echo "configuring iot edge with the provisioned edge device identity (output written to ./vm.log)..."
-
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE wget ${EDGE_CONFIG_SCRIPT_URL}
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x edge-config.sh
     ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE chmod +x ./edge-config.sh -e "${edgeVersion}" -c ${CONN_STRING@Q}
