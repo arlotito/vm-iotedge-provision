@@ -102,8 +102,11 @@ export VM_NAME=${VM_NAME,,}
 export VM_RG=${rg}
 
 export SSH_KEY_NAME="vmedge"
+export SSH_KEY_PUB=$SSH_KEY_FOLDER/$SSH_KEY_NAME.pub
+export SSH_KEY_PRIVATE=$SSH_KEY_FOLDER/$SSH_KEY_NAME.key
 
 export DEVICE_NAME=$VM_NAME
+
 
 export EDGE_CONFIG_SCRIPT_URL="https://raw.githubusercontent.com/arlotito/vm-iotedge-provision/dev/scripts/edge-config.sh"
 export EDGE_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/arlotito/vm-iotedge-provision/dev/scripts/edge-install.sh"
@@ -136,13 +139,13 @@ summary_hub () {
 
 create_keys () {
     # create ssh keys if not already there
-    if [ ! -f "$SSH_KEY_FOLDER/$SSH_KEY_NAME.pub" ] || [ ! -f "$SSH_KEY_FOLDER/$SSH_KEY_NAME.key" ]; 
+    if [ ! -f "${SSH_KEY_PRIVATE}" ] || [ ! -f "${SSH_KEY_PUB}" ]; 
     then
         echo "creating SSH keypair..."
         mkdir -p $SSH_KEY_FOLDER
-        ssh-keygen -b 2048 -t rsa -f $SSH_KEY_FOLDER/$SSH_KEY_NAME -q -N ""
-        chmod 400 $SSH_KEY_FOLDER/$SSH_KEY_NAME.key
-        chmod 444 $SSH_KEY_FOLDER/$SSH_KEY_NAME.pub
+        ssh-keygen -b 2048 -t rsa -f "${SSH_KEY_FOLDER}/${SSH_KEY_NAME}" -q -N ""
+        chmod 400 $SSH_KEY_PRIVATE
+        chmod 444 $SSH_KEY_PUB
     fi
 }
 
