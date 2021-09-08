@@ -123,10 +123,10 @@ summary_vm () {
     echo "  - rg:           $VM_RG"
     echo "  - fqdn:         $HOST_IP"
     echo "  - username:     $HOST_USERNAME"
-    echo "  - ssh keys:     $SSH_KEY_FOLDER/$SSH_KEY_NAME.key, $SSH_KEY_FOLDER/$SSH_KEY_NAME.pub"
+    echo "  - ssh keys:     $SSH_KEY_PRIVATE, $SSH_KEY_PUB"
     echo
     echo "to connect to the VM:"
-    echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_FOLDER/$SSH_KEY_NAME.key"
+    echo "  ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PUB"
 }
 
 summary_hub () {
@@ -144,6 +144,7 @@ create_keys () {
         echo "creating SSH keypair..."
         mkdir -p $SSH_KEY_FOLDER
         ssh-keygen -b 2048 -t rsa -f "${SSH_KEY_FOLDER}/${SSH_KEY_NAME}" -q -N ""
+        mv ${SSH_KEY_FOLDER}/${SSH_KEY_NAME} $SSH_KEY_PRIVATE
         chmod 400 $SSH_KEY_PRIVATE
         chmod 444 $SSH_KEY_PUB
     fi
