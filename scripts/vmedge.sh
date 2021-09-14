@@ -279,10 +279,10 @@ then
     sleep 10
 
     # checks
-    echo 
-    echo "remotely connecting to VM to check whether IoT Edge is up and running:"
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge version"
-    ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge list"
+    #echo 
+    #echo "remotely connecting to VM to check whether IoT Edge is up and running:"
+    #ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge version"
+    #ssh $HOST_USERNAME@$HOST_IP -i $SSH_KEY_PRIVATE -t "iotedge list"
 fi
 
 echo
