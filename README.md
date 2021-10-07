@@ -9,6 +9,14 @@ It's easy as:
     -d ./manifests/empty-1.2.json 
 ```
 
+...or execute it from the web without downloading it:
+```language
+curl -L https://raw.githubusercontent.com/arlotito/vm-iotedge-provision/dev/scripts/vmedge.sh | bash -s -- \
+    -s Standard_DS2_v2 -g my-rg \
+    -e 1.2 \
+    -n my-iot-hub
+```
+
 It will:
 * create a VM of the given size ('Standard_DS2_v2') in the given resource group ('my-rg') with Ubuntu Server 18.04
 * install IoT Edge (version 1.2)
