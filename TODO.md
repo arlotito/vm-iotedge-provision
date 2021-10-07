@@ -1,5 +1,6 @@
 TO DO:
 * option to set a custom VM name (instead of using the auto-generated one)
+* check dependencies (jq, az iot, ...) before starting
 
 DONE:
 * by default, store keys in $HOME/.ssh
