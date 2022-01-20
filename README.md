@@ -54,7 +54,7 @@ VM
   - name:         standard-ds2-v2-edge-1-2-1627639870
   - rg:           my-rg
   - fqdn:         standard-ds2-v2-edge-1-2-1627639870.westeurope.cloudapp.azure.com
-  - username:     arlotito
+  - username:     azuser
   - ssh keys:     ./keys/vm.pub, ./keys/vm
 
 IoT HUB
@@ -63,7 +63,7 @@ IoT HUB
   - conn string:  HostName=my-iot-hub.azure-devices.net;DeviceId=standard-ds2-v2-edge-1-2-1627639870;SharedAccessKey=ZzpXRtbuOdZnbjqSM2AVs********************=
 
 to connect to the VM:
-  ssh arlotito@standard-ds2-v2-edge-1-2-1627639870.westeurope.cloudapp.azure.com -i ./keys/vm
+  ssh azuser@standard-ds2-v2-edge-1-2-1627639870.westeurope.cloudapp.azure.com -i ./keys/vm
 ```
 
 NOTE:
@@ -82,20 +82,23 @@ If not already signed-in, do `az login` and select the tenant/subscription where
 ```bash
 ./vm-iotedge-provision.sh -h
 
-Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-edge-version> -h <iot-hub-name> [-d <deployment-manifest>] [-l] [-k <ssh-keys-folder>]
+Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-edge-version> [-l <location>] [-h <iot-hub-name>] [-d <deployment-manifest>] [-p] [-k <ssh-keys-folder>]
 
-  -h                            display this help
+  -h                            (optional) display this help
   -s  <vm-size>                 vm size ('Standard_DS2_v2', 'Standard_D2_v2', 'Standard_DS2_v2'...)
   -g  <resource-group>          resource-group
-  -e  <iot-edge-version>        '1.1', '1.2' or '1.2.2'
-  -n  <iot-hub-name>            IoT HUB name (will be used to provision the IoT Edge)
+  -l  <location>                (optional) location where to create RG and VM.
+                                Default is "westeurope"
+  -e  <iot-edge-version>        (optional) '1.1', '1.2' or '1.2.2'. If not specified, iot edge won't be installed
+  -n  <iot-hub-name>            (optional) IoT HUB name (will be used to provision the IoT Edge)
+                                If not specified, iot edge won't be provisioned. 
   -d  <deployment-manifest>     (optional) deployment manifest. 
                                 Default is none.
   -u  <username>                (optional) VM username.
-                                Default is 'arlotito'
-  -k  <ssh-keys-folder>         (optional) folder with ssh key pair ('vm', 'vm.pub'). If empty, a key pair will be generareted.
-                                Default is './keys' 
-  -l                            (optional) SSH into the VM once done.
+                                Default is 'azuser'
+  -k  <ssh-keys-folder>         (optional) folder with ssh key pair ('vmedge.key', 'vmedge.pub'). If non existing already, a key pair will be generareted.
+                                Default folder is '~/.ssh' 
+  -p                            (optional) SSH into the VM once done.
                                 Default is do not login.
 
 Example:

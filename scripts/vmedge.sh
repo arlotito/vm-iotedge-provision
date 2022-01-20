@@ -2,11 +2,13 @@
 showHelp() {
 # `cat << EOF` This means that cat should stop reading when EOF is detected
 cat << EOF  
-Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-edge-version> [-h <iot-hub-name>] [-d <deployment-manifest>] [-l] [-k <ssh-keys-folder>]
+Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-edge-version> [-l <location>] [-h <iot-hub-name>] [-d <deployment-manifest>] [-p] [-k <ssh-keys-folder>]
 
   -h                            (optional) display this help
   -s  <vm-size>                 vm size ('Standard_DS2_v2', 'Standard_D2_v2', 'Standard_DS2_v2'...)
   -g  <resource-group>          resource-group
+  -l  <location>                (optional) location where to create RG and VM.
+                                Default is "westeurope"
   -e  <iot-edge-version>        (optional) '1.1', '1.2' or '1.2.2'. If not specified, iot edge won't be installed
   -n  <iot-hub-name>            (optional) IoT HUB name (will be used to provision the IoT Edge)
                                 If not specified, iot edge won't be provisioned. 
@@ -16,7 +18,7 @@ Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-
                                 Default is 'azuser'
   -k  <ssh-keys-folder>         (optional) folder with ssh key pair ('vmedge.key', 'vmedge.pub'). If non existing already, a key pair will be generareted.
                                 Default folder is '~/.ssh' 
-  -l                            (optional) SSH into the VM once done.
+  -p                            (optional) SSH into the VM once done.
                                 Default is do not login.
 
 Example, deploy VM only:
@@ -54,7 +56,8 @@ HUB_NAME=""
 SSH_KEY_FOLDER="${HOME}/.ssh"
 HOST_USERNAME="azuser"
 VM_SHUTDOWN_TIME=2100
-while getopts "hls:d:g:e:k:n:u:" args; do
+LOCATION=westeurope
+while getopts "hps:d:g:e:k:n:u:l:" args; do
     case "${args}" in
         h ) showHelp;;
         s ) vmSize="${OPTARG}";;
@@ -64,7 +67,8 @@ while getopts "hls:d:g:e:k:n:u:" args; do
         n ) HUB_NAME="${OPTARG}";;
         k ) SSH_KEY_FOLDER="${OPTARG}";;
         u ) HOST_USERNAME="${OPTARG}";;
-        l ) login="true";;
+        l ) LOCATION="${OPTARG}";;
+        p ) login="true";;
         \? ) echo "Unknown option: -$OPTARG" >&2; echo; showHelp; exit 1;;
         :  ) echo "Missing option argument for -$OPTARG" >&2; echo; showHelp; exit 1;;
         *  ) echo "Unimplemented option: -$OPTARG" >&2; echo; showHelp; exit 1;;
@@ -152,7 +156,7 @@ create_keys () {
 
 create_rg () {
     echo "creating resource group '$VM_RG'..."
-    result=$(az group create --location westeurope --resource-group $VM_RG | jq -r .properties.provisioningState)
+    result=$(az group create --location $LOCATION --resource-group $VM_RG | jq -r .properties.provisioningState)
     if [ "$result" != "Succeeded" ]; 
     then
         echo -e "${RED}ERROR!${NC}"
@@ -162,7 +166,7 @@ create_rg () {
 
 create_vm () {
     echo "creating vm '$VM_NAME'..."
-    result=$(az vm create --name $VM_NAME -g $VM_RG \
+    result=$(az vm create --name $VM_NAME -g $VM_RG --location $LOCATION \
         --public-ip-address-dns-name $VM_NAME --public-ip-sku Standard \
         --image Canonical:UbuntuServer:18.04-LTS:latest \
         --size $vmSize \
