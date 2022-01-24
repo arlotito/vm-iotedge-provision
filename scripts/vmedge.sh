@@ -6,6 +6,8 @@ Usage: ./vm-iotedge-provision.sh [-h] -s <vm-size> -g  <resource-group> -e <iot-
 
   -h                            (optional) display this help
   -s  <vm-size>                 vm size ('Standard_DS2_v2', 'Standard_D2_v2', 'Standard_DS2_v2'...)
+  -v  <vm-name>                 (optional) vm name. 
+                                If not specified, the vm name will be auto-generated using the pattern "${vmSize}-edge-$edgeVersion-$TODAY"
   -g  <resource-group>          resource-group
   -l  <location>                (optional) location where to create RG and VM.
                                 Default is "westeurope"
@@ -57,13 +59,14 @@ SSH_KEY_FOLDER="${HOME}/.ssh"
 HOST_USERNAME="azuser"
 VM_SHUTDOWN_TIME=2100
 LOCATION=westeurope
-while getopts "hps:d:g:e:k:n:u:l:" args; do
+while getopts "hps:d:g:e:k:n:u:l:v:" args; do
     case "${args}" in
         h ) showHelp;;
         s ) vmSize="${OPTARG}";;
         d ) deploymentManifest="${OPTARG}";;
         g ) rg="${OPTARG}";;
         e ) edgeVersion="${OPTARG}";;
+        v ) vmName="${OPTARG}";;
         n ) HUB_NAME="${OPTARG}";;
         k ) SSH_KEY_FOLDER="${OPTARG}";;
         u ) HOST_USERNAME="${OPTARG}";;
@@ -94,13 +97,21 @@ then
 fi
 
 export TODAY=$(date +"%s")
-export VM_NAME=${vmSize}-edge-$edgeVersion-$TODAY 
-# replace "_" with "-"
-export VM_NAME=${VM_NAME//_/-}
-# replace "." with "-"
-export VM_NAME=${VM_NAME//./-}
-# convert the string to lowercase
-export VM_NAME=${VM_NAME,,}             
+
+if [ "$vmName" ];
+then
+    export VM_NAME="$vmName"
+else
+    # ${vmSize}-edge-$edgeVersion-$TODAY
+
+    export VM_NAME=${vmSize}-edge-$edgeVersion-$TODAY 
+    # replace "_" with "-"
+    export VM_NAME=${VM_NAME//_/-}
+    # replace "." with "-"
+    export VM_NAME=${VM_NAME//./-}
+    # convert the string to lowercase
+    export VM_NAME=${VM_NAME,,}  
+fi
     
 
 export VM_RG=${rg}
